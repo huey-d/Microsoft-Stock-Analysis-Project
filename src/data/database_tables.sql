@@ -104,6 +104,8 @@ CREATE TABLE balance_sheet_data (
     commonStockSharesOutstanding TEXT
 );
 
+
+
 CREATE TABLE income_statement_data (
     fiscalDateEnding DATE,
     reportedCurrency VARCHAR(50),
