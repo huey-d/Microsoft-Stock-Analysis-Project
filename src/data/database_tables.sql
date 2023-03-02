@@ -16,6 +16,16 @@ CREATE TABLE historical_data (
     split_coefficient NUMERIC(12, 4) NOT NULL
 );
 
+-- ALTER TABLE historical_data
+-- ALTER COLUMN "open" TYPE FLOAT USING "open"::float,
+-- ALTER COLUMN high TYPE float USING high::float,
+-- ALTER COLUMN "low" TYPE float USING low::float,
+-- ALTER COLUMN "close" TYPE float USING "close"::float,
+-- ALTER COLUMN adjusted_close TYPE float USING adjusted_close::float,
+-- ALTER COLUMN volume TYPE float USING volume::float,
+-- ALTER COLUMN dividend_amount TYPE float USING dividend_amount::float,
+-- ALTER COLUMN split_coefficient TYPE float USING split_coefficient::float;
+
 CREATE TABLE microsoft (
     Symbol VARCHAR(255),
     AssetType VARCHAR(255),
@@ -41,6 +51,17 @@ CREATE TABLE microsoft (
     ExDividendDate VARCHAR(255)
 );
 
+-- ALTER TABLE microsoft
+--     ALTER COLUMN MarketCapitalization TYPE NUMERIC(20,4) USING MarketCapitalization::NUMERIC,
+--     ALTER COLUMN EPS TYPE NUMERIC(20,4) USING EPS::NUMERIC,
+--     ALTER COLUMN ProfitMargin TYPE NUMERIC(20,4) USING ProfitMargin::NUMERIC,
+--     ALTER COLUMN QuarterlyEarningsGrowthYOY TYPE NUMERIC(20,4) USING QuarterlyEarningsGrowthYOY::NUMERIC,
+--     ALTER COLUMN QuarterlyRevenueGrowthYOY TYPE NUMERIC(20,4) USING QuarterlyRevenueGrowthYOY::NUMERIC,
+--     ALTER COLUMN AnalystTargetPrice TYPE NUMERIC(20,4) USING AnalystTargetPrice::NUMERIC,
+--     ALTER COLUMN Beta TYPE NUMERIC(20,4) USING Beta::NUMERIC,
+--     ALTER COLUMN SharesOutstanding TYPE BIGINT USING sharesoutstanding::bigint,
+--     ALTER COLUMN DividendDate TYPE DATE USING to_date(DividendDate, 'YYYY-MM-DD'),
+--     ALTER COLUMN ExDividendDate TYPE DATE USING to_date(ExDividendDate, 'YYYY-MM-DD');
 
 CREATE TABLE balance_sheet_data (
     fiscalDateEnding TEXT,
@@ -112,6 +133,8 @@ CREATE TABLE income_statement_data (
     netIncome FLOAT
 );
 
+-- ALTER TABLE income_statement_data
+--     ALTER COLUMN interestincome TYPE VARCHAR(255) USING interestincome::VARCHAR(255);
 
 CREATE TABLE cash_flow_data (
     fiscalDateEnding DATE,
@@ -144,3 +167,4 @@ CREATE TABLE cash_flow_data (
     changeInExchangeRate VARCHAR(255),
     netIncome FLOAT
 );
+
