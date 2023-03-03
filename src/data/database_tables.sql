@@ -16,21 +16,37 @@ CREATE TABLE historical_data (
     split_coefficient FLOAT NOT NULL
 );
 
--- ALTER TABLE historical_data
--- ALTER COLUMN "open" TYPE FLOAT USING "open"::float,
--- ALTER COLUMN high TYPE FLOAT USING high::float,
--- ALTER COLUMN "low" TYPE FLOAT USING low::float,
--- ALTER COLUMN "close" TYPE FLOAT USING "close"::float,
--- ALTER COLUMN adjusted_close TYPE FLOAT USING adjusted_close::float,
--- ALTER COLUMN volume TYPE FLOAT USING volume::float,
--- ALTER COLUMN dividend_amount TYPE FLOAT USING dividend_amount::float,
--- ALTER COLUMN split_coefficient TYPE FLOAT USING split_coefficient::float;
+-- CREATE TABLE microsoft (
+--     Symbol VARCHAR(255),
+--     AssetType VARCHAR(255),
+--     Name VARCHAR(255),
+--     Description TEXT,
+--     Exchange VARCHAR(255),
+--     Currency VARCHAR(255),
+--     Country VARCHAR(255),
+--     Sector VARCHAR(255),
+--     Industry VARCHAR(255),
+--     Address VARCHAR(255),
+--     FiscalYearEnd VARCHAR(255),
+--     LatestQuarter VARCHAR(255),
+--     MarketCapitalization NUMERIC(20,4),
+--     EPS NUMERIC(20,4),
+--     ProfitMargin NUMERIC(20,4),
+--     QuarterlyEarningsGrowthYOY NUMERIC(20,4),
+--     QuarterlyRevenueGrowthYOY NUMERIC(20,4),
+--     AnalystTargetPrice NUMERIC(20,4),
+--     Beta NUMERIC(20,4),
+--     SharesOutstanding BIGINT,
+--     DividendDate DATE,
+--     ExDividendDate DATE
+-- );
 
 CREATE TABLE microsoft (
     Symbol VARCHAR(255),
     AssetType VARCHAR(255),
     Name VARCHAR(255),
     Description TEXT,
+    CIK VARCHAR(255),
     Exchange VARCHAR(255),
     Currency VARCHAR(255),
     Country VARCHAR(255),
@@ -38,73 +54,42 @@ CREATE TABLE microsoft (
     Industry VARCHAR(255),
     Address VARCHAR(255),
     FiscalYearEnd VARCHAR(255),
-    LatestQuarter VARCHAR(255),
-    MarketCapitalization NUMERIC(20,4),
-    EPS NUMERIC(20,4),
-    ProfitMargin NUMERIC(20,4),
-    QuarterlyEarningsGrowthYOY NUMERIC(20,4),
-    QuarterlyRevenueGrowthYOY NUMERIC(20,4),
-    AnalystTargetPrice NUMERIC(20,4),
-    Beta NUMERIC(20,4),
+    LatestQuarter DATE,
+    MarketCapitalization BIGINT,
+    EBITDA VARCHAR(255),
+    PERatio VARCHAR(255),
+    PEGRatio VARCHAR(255),
+    BookValue VARCHAR(255),
+    DividendPerShare VARCHAR(255),
+    DividendYield VARCHAR(255),
+    EPS VARCHAR(255),
+    RevenuePerShareTTM VARCHAR(255),
+    ProfitMargin VARCHAR(255),
+    OperatingMarginTTM VARCHAR(255),
+    ReturnOnAssetsTTM VARCHAR(255),
+    ReturnOnEquityTTM VARCHAR(255),
+    RevenueTTM BIGINT,
+    GrossProfitTTM VARCHAR(255),
+    DilutedEPSTTM VARCHAR(255),
+    QuarterlyEarningsGrowthYOY VARCHAR(255),
+    QuarterlyRevenueGrowthYOY VARCHAR(255),
+    AnalystTargetPrice VARCHAR(255),
+    TrailingPE VARCHAR(255),
+    ForwardPE VARCHAR(255),
+    PriceToSalesRatioTTM VARCHAR(255),
+    PriceToBookRatio VARCHAR(255),
+    EVToRevenue VARCHAR(255),
+    EVToEBITDA VARCHAR(255),
+    Beta VARCHAR(255),
+    "52WeekHigh" VARCHAR(255),
+    "52WeekLow" VARCHAR(255),
+    "50DayMovingAverage" VARCHAR(255),
+    "200DayMovingAverage" VARCHAR(255),
     SharesOutstanding BIGINT,
     DividendDate DATE,
     ExDividendDate DATE
 );
 
--- ALTER TABLE microsoft
---     ALTER COLUMN MarketCapitalization TYPE NUMERIC(20,4) USING MarketCapitalization::NUMERIC,
---     ALTER COLUMN EPS TYPE NUMERIC(20,4) USING EPS::NUMERIC,
---     ALTER COLUMN ProfitMargin TYPE NUMERIC(20,4) USING ProfitMargin::NUMERIC,
---     ALTER COLUMN QuarterlyEarningsGrowthYOY TYPE NUMERIC(20,4) USING QuarterlyEarningsGrowthYOY::NUMERIC,
---     ALTER COLUMN QuarterlyRevenueGrowthYOY TYPE NUMERIC(20,4) USING QuarterlyRevenueGrowthYOY::NUMERIC,
---     ALTER COLUMN AnalystTargetPrice TYPE NUMERIC(20,4) USING AnalystTargetPrice::NUMERIC,
---     ALTER COLUMN Beta TYPE NUMERIC(20,4) USING Beta::NUMERIC,
---     ALTER COLUMN SharesOutstanding TYPE BIGINT USING sharesoutstanding::bigint,
---     ALTER COLUMN DividendDate TYPE DATE USING to_date(DividendDate, 'YYYY-MM-DD'),
---     ALTER COLUMN ExDividendDate TYPE DATE USING to_date(ExDividendDate, 'YYYY-MM-DD');
-
-CREATE TABLE balance_sheet_data (
-    fiscalDateEnding TEXT, 
-    reportedCurrency TEXT,
-    totalAssets TEXT,
-    totalCurrentAssets TEXT,
-    cashAndCashEquivalentsAtCarryingValue TEXT,
-    cashAndShortTermInvestments TEXT,
-    inventory TEXT,
-    currentNetReceivables TEXT,
-    totalNonCurrentAssets TEXT,
-    propertyPlantEquipment TEXT,
-    accumulatedDepreciationAmortizationPPE TEXT,
-    intangibleAssets TEXT,
-    intangibleAssetsExcludingGoodwill TEXT,
-    goodwill TEXT,
-    investments TEXT,
-    longTermInvestments TEXT,
-    shortTermInvestments TEXT,
-    otherCurrentAssets TEXT,
-    otherNonCurrentAssets TEXT,
-    totalLiabilities TEXT,
-    totalCurrentLiabilities TEXT,
-    currentAccountsPayable TEXT,
-    deferredRevenue TEXT,
-    currentDebt TEXT,
-    shortTermDebt TEXT,
-    totalNonCurrentLiabilities TEXT,
-    capitalLeaseObligations TEXT,
-    longTermDebt TEXT,
-    currentLongTermDebt TEXT,
-    longTermDebtNoncurrent TEXT,
-    shortLongTermDebtTotal TEXT,
-    otherCurrentLiabilities TEXT,
-    otherNonCurrentLiabilities TEXT,
-    totalShareholderEquity TEXT,
-    treasuryStock TEXT,
-    retainedEarnings TEXT,
-    commonStock TEXT,
-    commonStockSharesOutstanding TEXT
-);
-
--- Altered Table (maybe)
 
 CREATE TABLE balance_sheet_data (
     fiscalDateEnding DATE, 
@@ -177,9 +162,6 @@ CREATE TABLE income_statement_data (
     ebitda FLOAT,
     netIncome FLOAT
 );
-
--- ALTER TABLE income_statement_data
---     ALTER COLUMN interestincome TYPE VARCHAR(255) USING interestincome::VARCHAR(255);
 
 CREATE TABLE cash_flow_data (
     fiscalDateEnding DATE,
