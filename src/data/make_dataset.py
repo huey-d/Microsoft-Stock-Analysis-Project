@@ -1,9 +1,7 @@
 import pandas as pd
 import alpha_vantage.timeseries
 import alpha_vantage.fundamentaldata
-import time
 import psycopg2
-import pprint
 
 import keys
 from keys import api_key
@@ -73,7 +71,7 @@ class StockData:
         # Connect to PostgreSQL database
         conn = psycopg2.connect(
             host=keys.host,
-            database=keys.database,
+            database=keys.test_database,
             user=keys.user,
             password=keys.password
         )
@@ -120,24 +118,24 @@ class StockData:
                          row.SharesOutstanding,
                          row.DividendDate))
 
-        # Insert balance sheet data into database
-        _, balance_sheet_data, _, _ = self.get_fundamental_data()
-        for row in balance_sheet_data.itertuples(index=False):
-            cur.execute("""INSERT INTO balance_sheet_data (fiscalDateEnding, reportedCurrency, totalAssets, totalCurrentAssets, cashAndCashEquivalentsAtCarryingValue, cashAndShortTermInvestments, inventory, currentNetReceivables, totalNonCurrentAssets, propertyPlantEquipment, accumulatedDepreciationAmortizationPPE, intangibleAssets, intangibleAssetsExcludingGoodwill, goodwill, investments, longTermInvestments, shortTermInvestments, otherCurrentAssets, otherNonCurrentAssets, totalLiabilities, totalCurrentLiabilities, currentAccountsPayable, deferredRevenue, currentDebt, shortTermDebt, totalNonCurrentLiabilities, capitalLeaseObligations, longTermDebt, currentLongTermDebt, longTermDebtNoncurrent, shortLongTermDebtTotal, otherCurrentLiabilities, otherNonCurrentLiabilities, totalShareholderEquity, treasuryStock, retainedEarnings, commonStock, commonStockSharesOutstanding) VALUES ( %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) """,
-                        (row.fiscalDateEnding, row.reportedCurrency, row.totalAssets, row.totalCurrentAssets, row.cashAndCashEquivalentsAtCarryingValue, row.cashAndShortTermInvestments, row.inventory, row.currentNetReceivables, row.totalNonCurrentAssets, row.propertyPlantEquipment, row.accumulatedDepreciationAmortizationPPE, row.intangibleAssets, row.intangibleAssetsExcludingGoodwill, row.goodwill, row.investments, row.longTermInvestments, row.shortTermInvestments, row.otherCurrentAssets, row.otherNonCurrentAssets, row.totalLiabilities, row.totalCurrentLiabilities, row.currentAccountsPayable, row.deferredRevenue, row.currentDebt, row.shortTermDebt, row.totalNonCurrentLiabilities, row.capitalLeaseObligations, row.longTermDebt, row.currentLongTermDebt, row.longTermDebtNoncurrent, row.shortLongTermDebtTotal, row.otherCurrentLiabilities, row.otherNonCurrentLiabilities, row.totalShareholderEquity, row.treasuryStock, row.retainedEarnings, row.commonStock, row.commonStockSharesOutstanding))
+        # # Insert balance sheet data into database
+        # _, balance_sheet_data, _, _ = self.get_fundamental_data()
+        # for row in balance_sheet_data.itertuples(index=False):
+        #     cur.execute("""INSERT INTO balance_sheet_data (fiscalDateEnding, reportedCurrency, totalAssets, totalCurrentAssets, cashAndCashEquivalentsAtCarryingValue, cashAndShortTermInvestments, inventory, currentNetReceivables, totalNonCurrentAssets, propertyPlantEquipment, accumulatedDepreciationAmortizationPPE, intangibleAssets, intangibleAssetsExcludingGoodwill, goodwill, investments, longTermInvestments, shortTermInvestments, otherCurrentAssets, otherNonCurrentAssets, totalLiabilities, totalCurrentLiabilities, currentAccountsPayable, deferredRevenue, currentDebt, shortTermDebt, totalNonCurrentLiabilities, capitalLeaseObligations, longTermDebt, currentLongTermDebt, longTermDebtNoncurrent, shortLongTermDebtTotal, otherCurrentLiabilities, otherNonCurrentLiabilities, totalShareholderEquity, treasuryStock, retainedEarnings, commonStock, commonStockSharesOutstanding) VALUES ( %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) """,
+        #                 (row.fiscalDateEnding, row.reportedCurrency, row.totalAssets, row.totalCurrentAssets, row.cashAndCashEquivalentsAtCarryingValue, row.cashAndShortTermInvestments, row.inventory, row.currentNetReceivables, row.totalNonCurrentAssets, row.propertyPlantEquipment, row.accumulatedDepreciationAmortizationPPE, row.intangibleAssets, row.intangibleAssetsExcludingGoodwill, row.goodwill, row.investments, row.longTermInvestments, row.shortTermInvestments, row.otherCurrentAssets, row.otherNonCurrentAssets, row.totalLiabilities, row.totalCurrentLiabilities, row.currentAccountsPayable, row.deferredRevenue, row.currentDebt, row.shortTermDebt, row.totalNonCurrentLiabilities, row.capitalLeaseObligations, row.longTermDebt, row.currentLongTermDebt, row.longTermDebtNoncurrent, row.shortLongTermDebtTotal, row.otherCurrentLiabilities, row.otherNonCurrentLiabilities, row.totalShareholderEquity, row.treasuryStock, row.retainedEarnings, row.commonStock, row.commonStockSharesOutstanding))
 
-        # Insert income statement data into database
-        _, _, income_statement_data, _ = self.get_fundamental_data()
-        for row in income_statement_data.itertuples(index=False):
-            cur.execute("INSERT INTO income_statement_data (fiscalDateEnding, reportedCurrency, grossProfit, totalRevenue, costOfRevenue, costofGoodsAndServicesSold, operatingIncome, sellingGeneralAndAdministrative, researchAndDevelopment, operatingExpenses, investmentIncomeNet, netInterestIncome, interestIncome, interestExpense, nonInterestIncome, otherNonOperatingIncome, depreciation, depreciationAndAmortization, incomeBeforeTax, incomeTaxExpense, interestAndDebtExpense, netIncomeFromContinuingOperations, comprehensiveIncomeNetOfTax, ebit, ebitda, netIncome) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
-                        (row.fiscalDateEnding, row.reportedCurrency, float(row.grossProfit), float(row.totalRevenue), float(row.costOfRevenue), float(row.costofGoodsAndServicesSold), float(row.operatingIncome), float(row.sellingGeneralAndAdministrative), float(row.researchAndDevelopment), float(row.operatingExpenses), float(row.investmentIncomeNet), float(row.netInterestIncome), row.interestIncome, float(row.interestExpense), float(row.nonInterestIncome), float(row.otherNonOperatingIncome), row.depreciation, float(row.depreciationAndAmortization), float(row.incomeBeforeTax), float(row.incomeTaxExpense), float(row.interestAndDebtExpense), float(row.netIncomeFromContinuingOperations), float(row.comprehensiveIncomeNetOfTax), float(row.ebit), float(row.ebitda), float(row.netIncome)))
+        # # Insert income statement data into database
+        # _, _, income_statement_data, _ = self.get_fundamental_data()
+        # for row in income_statement_data.itertuples(index=False):
+        #     cur.execute("INSERT INTO income_statement_data (fiscalDateEnding, reportedCurrency, grossProfit, totalRevenue, costOfRevenue, costofGoodsAndServicesSold, operatingIncome, sellingGeneralAndAdministrative, researchAndDevelopment, operatingExpenses, investmentIncomeNet, netInterestIncome, interestIncome, interestExpense, nonInterestIncome, otherNonOperatingIncome, depreciation, depreciationAndAmortization, incomeBeforeTax, incomeTaxExpense, interestAndDebtExpense, netIncomeFromContinuingOperations, comprehensiveIncomeNetOfTax, ebit, ebitda, netIncome) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+        #                 (row.fiscalDateEnding, row.reportedCurrency, float(row.grossProfit), float(row.totalRevenue), float(row.costOfRevenue), float(row.costofGoodsAndServicesSold), float(row.operatingIncome), float(row.sellingGeneralAndAdministrative), float(row.researchAndDevelopment), float(row.operatingExpenses), float(row.investmentIncomeNet), float(row.netInterestIncome), row.interestIncome, float(row.interestExpense), float(row.nonInterestIncome), float(row.otherNonOperatingIncome), row.depreciation, float(row.depreciationAndAmortization), float(row.incomeBeforeTax), float(row.incomeTaxExpense), float(row.interestAndDebtExpense), float(row.netIncomeFromContinuingOperations), float(row.comprehensiveIncomeNetOfTax), float(row.ebit), float(row.ebitda), float(row.netIncome)))
 
 
-        # Insert cash flow statement data into database
-        _, _, _, cash_flow_data = self.get_fundamental_data()
-        for row in cash_flow_data.itertuples(index=False):
-            cur.execute("INSERT INTO cash_flow_data (fiscalDateEnding, reportedCurrency, operatingCashflow, paymentsForOperatingActivities, proceedsFromOperatingActivities, changeInOperatingLiabilities, changeInOperatingAssets, depreciationDepletionAndAmortization, capitalExpenditures, changeInReceivables, changeInInventory, profitLoss, cashflowFromInvestment, cashflowFromFinancing, proceedsFromRepaymentsOfShortTermDebt, paymentsForRepurchaseOfCommonStock, paymentsForRepurchaseOfEquity, paymentsForRepurchaseOfPreferredStock, dividendPayout, dividendPayoutCommonStock, dividendPayoutPreferredStock, proceedsFromIssuanceOfCommonStock, proceedsFromIssuanceOfLongTermDebtAndCapitalSecuritiesNet, proceedsFromIssuanceOfPreferredStock, proceedsFromRepurchaseOfEquity, proceedsFromSaleOfTreasuryStock, changeInCashAndCashEquivalents, changeInExchangeRate, netIncome) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
-                        (row.fiscalDateEnding, row.reportedCurrency, row.operatingCashflow, row.paymentsForOperatingActivities, row.proceedsFromOperatingActivities, row.changeInOperatingLiabilities, row.changeInOperatingAssets, row.depreciationDepletionAndAmortization, row.capitalExpenditures, row.changeInReceivables, row.changeInInventory, row.profitLoss, row.cashflowFromInvestment, row.cashflowFromFinancing, row.proceedsFromRepaymentsOfShortTermDebt, row.paymentsForRepurchaseOfCommonStock, row.paymentsForRepurchaseOfEquity, row.paymentsForRepurchaseOfPreferredStock, row.dividendPayout, row.dividendPayoutCommonStock, row.dividendPayoutPreferredStock, row.proceedsFromIssuanceOfCommonStock, row.proceedsFromIssuanceOfLongTermDebtAndCapitalSecuritiesNet, row.proceedsFromIssuanceOfPreferredStock, row.proceedsFromRepurchaseOfEquity, row.proceedsFromSaleOfTreasuryStock, row.changeInCashAndCashEquivalents, row.changeInExchangeRate, row.netIncome))
+        # # Insert cash flow statement data into database
+        # _, _, _, cash_flow_data = self.get_fundamental_data()
+        # for row in cash_flow_data.itertuples(index=False):
+        #     cur.execute("INSERT INTO cash_flow_data (fiscalDateEnding, reportedCurrency, operatingCashflow, paymentsForOperatingActivities, proceedsFromOperatingActivities, changeInOperatingLiabilities, changeInOperatingAssets, depreciationDepletionAndAmortization, capitalExpenditures, changeInReceivables, changeInInventory, profitLoss, cashflowFromInvestment, cashflowFromFinancing, proceedsFromRepaymentsOfShortTermDebt, paymentsForRepurchaseOfCommonStock, paymentsForRepurchaseOfEquity, paymentsForRepurchaseOfPreferredStock, dividendPayout, dividendPayoutCommonStock, dividendPayoutPreferredStock, proceedsFromIssuanceOfCommonStock, proceedsFromIssuanceOfLongTermDebtAndCapitalSecuritiesNet, proceedsFromIssuanceOfPreferredStock, proceedsFromRepurchaseOfEquity, proceedsFromSaleOfTreasuryStock, changeInCashAndCashEquivalents, changeInExchangeRate, netIncome) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+        #                 (row.fiscalDateEnding, row.reportedCurrency, row.operatingCashflow, row.paymentsForOperatingActivities, row.proceedsFromOperatingActivities, row.changeInOperatingLiabilities, row.changeInOperatingAssets, row.depreciationDepletionAndAmortization, row.capitalExpenditures, row.changeInReceivables, row.changeInInventory, row.profitLoss, row.cashflowFromInvestment, row.cashflowFromFinancing, row.proceedsFromRepaymentsOfShortTermDebt, row.paymentsForRepurchaseOfCommonStock, row.paymentsForRepurchaseOfEquity, row.paymentsForRepurchaseOfPreferredStock, row.dividendPayout, row.dividendPayoutCommonStock, row.dividendPayoutPreferredStock, row.proceedsFromIssuanceOfCommonStock, row.proceedsFromIssuanceOfLongTermDebtAndCapitalSecuritiesNet, row.proceedsFromIssuanceOfPreferredStock, row.proceedsFromRepurchaseOfEquity, row.proceedsFromSaleOfTreasuryStock, row.changeInCashAndCashEquivalents, row.changeInExchangeRate, row.netIncome))
 
 
         # Commit the changes to the database
@@ -162,4 +160,4 @@ if __name__ == '__main__':
     # for i in [is_df, cf_df]:
     #     print(i)
     
-    # stock.save_to_database()
+    stock.save_to_database()
