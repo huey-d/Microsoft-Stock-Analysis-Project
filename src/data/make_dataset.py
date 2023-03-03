@@ -1,44 +1,93 @@
 import pandas as pd
 import alpha_vantage.timeseries
 import alpha_vantage.fundamentaldata
-import psycopg2
+
+import sqlalchemy
 
 import keys
 from keys import api_key
 
-overview_columns = [
-    'Symbol',
-    'AssetType',
-    'Name',
-    'Description',
-    'Exchange',
-    'Currency',
-    'Country',
-    'Sector',
-    'Industry',
-    'Address',
-    'FiscalYearEnd',
-    'LatestQuarter',
-    'MarketCapitalization',
-    'EPS',
-    'ProfitMargin',
-    'QuarterlyEarningsGrowthYOY',
-    'QuarterlyRevenueGrowthYOY',
-    'AnalystTargetPrice',
-    'Beta',
-    'SharesOutstanding',
-    'DividendDate'
-]
+import pprint
+
+# overview_columns = [
+#     'Symbol',
+#     'AssetType',
+#     'Name',
+#     'Description',
+#     'Exchange',
+#     'Currency',
+#     'Country',
+#     'Sector',
+#     'Industry',
+#     'Address',
+#     'FiscalYearEnd',
+#     'LatestQuarter',
+#     'MarketCapitalization',
+#     'EPS',
+#     'ProfitMargin',
+#     'QuarterlyEarningsGrowthYOY',
+#     'QuarterlyRevenueGrowthYOY',
+#     'AnalystTargetPrice',
+#     'Beta',
+#     'SharesOutstanding',
+#     'DividendDate'
+# ]
 
 class StockData:
+    """
+    A class for fetching, storing and persisting stock data for a particular ticker. 
+    
+    Parameters:
+    -----------
+    ticker : str
+        The ticker symbol for the stock.
+    
+    Attributes:
+    -----------
+    ticker : str
+        The ticker symbol for the stock.
+    ts : alpha_vantage.timeseries.TimeSeries object
+        The Alpha Vantage API time series object.
+    fd : alpha_vantage.fundamentaldata.FundamentalData object
+        The Alpha Vantage API fundamental data object.
+    
+    Methods:
+    --------
+    get_historical_data():
+        Fetches historical daily adjusted stock data for the ticker and returns it as a pandas DataFrame.
+        
+    get_fundamental_data():
+        Fetches company overview, balance sheet, income statement and cash flow data for the ticker and returns each 
+        dataset as a separate pandas DataFrame.
+    
+    save_to_database():
+        Connects to a PostgreSQL database and saves historical, overview, balance sheet, income statement and 
+        cash flow data for the ticker in their respective tables.
+    """
     
     def __init__(self, ticker: str):
+        """
+        Constructs a new StockData object for the specified ticker.
+        
+        Parameters:
+        -----------
+        ticker : str
+            The ticker symbol for the stock.
+        """
         self.ticker = ticker
         self.ts = alpha_vantage.timeseries.TimeSeries(key=api_key,
                                                       output_format='pandas')
         self.fd = alpha_vantage.fundamentaldata.FundamentalData(key=api_key)
     
     def get_historical_data(self):
+        """
+        Fetches historical daily adjusted stock data for the ticker and returns it as a pandas DataFrame.
+        
+        Returns:
+        --------
+        historical_data : pandas.DataFrame
+            A DataFrame containing historical daily adjusted stock data for the ticker.
+        """
         data, _ = self.ts.get_daily_adjusted(symbol=self.ticker, outputsize='full')
         historical_data = pd.DataFrame(data=data)
         historical_data = historical_data.rename(columns={historical_data.columns[0]: 'open',
@@ -53,8 +102,23 @@ class StockData:
         return historical_data
     
     def get_fundamental_data(self):
+        """
+        Fetches company overview, balance sheet, income statement and cash flow data for the ticker and returns each 
+        dataset as a separate pandas DataFrame.
+        
+        Returns:
+        --------
+        overview_df : pandas.DataFrame
+            A DataFrame containing company overview data for the ticker.
+        bs_df : pandas.DataFrame
+            A DataFrame containing balance sheet data for the ticker.
+        is_df : pandas.DataFrame
+            A DataFrame containing income statement data for the ticker.
+        cf_df : pandas.DataFrame
+            A DataFrame containing cash flow data for the ticker.
+        """
         overview = self.fd.get_company_overview(symbol=self.ticker)
-        overview_df = pd.DataFrame(overview[0], index=[0], columns=overview_columns)
+        overview_df = pd.DataFrame(overview[0], index=[0])
         
         q_bs = self.fd.get_balance_sheet_quarterly(symbol=self.ticker)
         bs_df = pd.DataFrame.from_records(q_bs[0])
@@ -66,98 +130,31 @@ class StockData:
         cf_df = pd.DataFrame.from_records(q_cf[0])
 
         return overview_df, bs_df, is_df, cf_df
+
+    def save_to_database(self, conn_str: str):
+        """
+        Connects to a PostgreSQL database and saves historical, overview, balance sheet, income statement and 
+        cash flow data for the ticker in their respective tables.
+    
+        Parameters:
+        -----------
+        conn_str : str
+            A string containing the connection information for the PostgreSQL database.
         
-    def save_to_database(self):
-        # Connect to PostgreSQL database
-        conn = psycopg2.connect(
-            host=keys.host,
-            database=keys.test_database,
-            user=keys.user,
-            password=keys.password
-        )
+        """
+        engine = sqlalchemy.create_engine(conn_str)
+        historical_data = self.get_historical_data()
+        overview_df, bs_df, is_df, cf_df = self.get_fundamental_data()
 
-        # Open a cursor to perform database operations
-        cur = conn.cursor()
-
-        # Insert historical data into database
-        historical_data = self.get_historical_data()            
-        for row in historical_data.itertuples(index=False):
-            cur.execute("""INSERT INTO historical_data (date, open, high, low, close, adjusted_close, volume, dividend_amount, split_coefficient) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)""",
-                        (row.date,
-                         row.open,
-                         row.high,
-                         row.low,
-                         row.close,
-                         row.adjusted_close,
-                         row.volume,
-                         row.dividend_amount,
-                         row.split_coefficient))
-        
-        overview_data, _, _, _ = self.get_fundamental_data()
-        for row in overview_data.itertuples(index=False):
-            cur.execute("""INSERT INTO microsoft (Symbol, AssetType, Name, Description, Exchange, Currency, Country, Sector, Industry, Address, FiscalYearEnd, LatestQuarter, MarketCapitalization, EPS, ProfitMargin, QuarterlyEarningsGrowthYOY, QuarterlyRevenueGrowthYOY, AnalystTargetPrice, Beta, SharesOutstanding, DividendDate) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
-                        (row.Symbol,
-                         row.AssetType,
-                         row.Name,
-                         row.Description,
-                         row.Exchange,
-                         row.Currency,
-                         row.Country,
-                         row.Sector,
-                         row.Industry,
-                         row.Address,
-                         row.FiscalYearEnd,
-                         row.LatestQuarter,
-                         row.MarketCapitalization,
-                         row.EPS,
-                         row.ProfitMargin,
-                         row.QuarterlyEarningsGrowthYOY,
-                         row.QuarterlyRevenueGrowthYOY,
-                         row.AnalystTargetPrice,
-                         row.Beta,
-                         row.SharesOutstanding,
-                         row.DividendDate))
-
-        # # Insert balance sheet data into database
-        # _, balance_sheet_data, _, _ = self.get_fundamental_data()
-        # for row in balance_sheet_data.itertuples(index=False):
-        #     cur.execute("""INSERT INTO balance_sheet_data (fiscalDateEnding, reportedCurrency, totalAssets, totalCurrentAssets, cashAndCashEquivalentsAtCarryingValue, cashAndShortTermInvestments, inventory, currentNetReceivables, totalNonCurrentAssets, propertyPlantEquipment, accumulatedDepreciationAmortizationPPE, intangibleAssets, intangibleAssetsExcludingGoodwill, goodwill, investments, longTermInvestments, shortTermInvestments, otherCurrentAssets, otherNonCurrentAssets, totalLiabilities, totalCurrentLiabilities, currentAccountsPayable, deferredRevenue, currentDebt, shortTermDebt, totalNonCurrentLiabilities, capitalLeaseObligations, longTermDebt, currentLongTermDebt, longTermDebtNoncurrent, shortLongTermDebtTotal, otherCurrentLiabilities, otherNonCurrentLiabilities, totalShareholderEquity, treasuryStock, retainedEarnings, commonStock, commonStockSharesOutstanding) VALUES ( %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) """,
-        #                 (row.fiscalDateEnding, row.reportedCurrency, row.totalAssets, row.totalCurrentAssets, row.cashAndCashEquivalentsAtCarryingValue, row.cashAndShortTermInvestments, row.inventory, row.currentNetReceivables, row.totalNonCurrentAssets, row.propertyPlantEquipment, row.accumulatedDepreciationAmortizationPPE, row.intangibleAssets, row.intangibleAssetsExcludingGoodwill, row.goodwill, row.investments, row.longTermInvestments, row.shortTermInvestments, row.otherCurrentAssets, row.otherNonCurrentAssets, row.totalLiabilities, row.totalCurrentLiabilities, row.currentAccountsPayable, row.deferredRevenue, row.currentDebt, row.shortTermDebt, row.totalNonCurrentLiabilities, row.capitalLeaseObligations, row.longTermDebt, row.currentLongTermDebt, row.longTermDebtNoncurrent, row.shortLongTermDebtTotal, row.otherCurrentLiabilities, row.otherNonCurrentLiabilities, row.totalShareholderEquity, row.treasuryStock, row.retainedEarnings, row.commonStock, row.commonStockSharesOutstanding))
-
-        # # Insert income statement data into database
-        # _, _, income_statement_data, _ = self.get_fundamental_data()
-        # for row in income_statement_data.itertuples(index=False):
-        #     cur.execute("INSERT INTO income_statement_data (fiscalDateEnding, reportedCurrency, grossProfit, totalRevenue, costOfRevenue, costofGoodsAndServicesSold, operatingIncome, sellingGeneralAndAdministrative, researchAndDevelopment, operatingExpenses, investmentIncomeNet, netInterestIncome, interestIncome, interestExpense, nonInterestIncome, otherNonOperatingIncome, depreciation, depreciationAndAmortization, incomeBeforeTax, incomeTaxExpense, interestAndDebtExpense, netIncomeFromContinuingOperations, comprehensiveIncomeNetOfTax, ebit, ebitda, netIncome) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
-        #                 (row.fiscalDateEnding, row.reportedCurrency, float(row.grossProfit), float(row.totalRevenue), float(row.costOfRevenue), float(row.costofGoodsAndServicesSold), float(row.operatingIncome), float(row.sellingGeneralAndAdministrative), float(row.researchAndDevelopment), float(row.operatingExpenses), float(row.investmentIncomeNet), float(row.netInterestIncome), row.interestIncome, float(row.interestExpense), float(row.nonInterestIncome), float(row.otherNonOperatingIncome), row.depreciation, float(row.depreciationAndAmortization), float(row.incomeBeforeTax), float(row.incomeTaxExpense), float(row.interestAndDebtExpense), float(row.netIncomeFromContinuingOperations), float(row.comprehensiveIncomeNetOfTax), float(row.ebit), float(row.ebitda), float(row.netIncome)))
+        historical_data.to_sql('historical_data', engine, if_exists='replace', index=False)
+        overview_df.to_sql('microsoft', engine, if_exists='replace', index=False)
+        bs_df.to_sql('balance_sheet_data', engine, if_exists='replace', index=False)
+        is_df.to_sql('income_statement_data', engine, if_exists='replace', index=False)
+        cf_df.to_sql('cash_flow_data', engine, if_exists='replace', index=False)
 
 
-        # # Insert cash flow statement data into database
-        # _, _, _, cash_flow_data = self.get_fundamental_data()
-        # for row in cash_flow_data.itertuples(index=False):
-        #     cur.execute("INSERT INTO cash_flow_data (fiscalDateEnding, reportedCurrency, operatingCashflow, paymentsForOperatingActivities, proceedsFromOperatingActivities, changeInOperatingLiabilities, changeInOperatingAssets, depreciationDepletionAndAmortization, capitalExpenditures, changeInReceivables, changeInInventory, profitLoss, cashflowFromInvestment, cashflowFromFinancing, proceedsFromRepaymentsOfShortTermDebt, paymentsForRepurchaseOfCommonStock, paymentsForRepurchaseOfEquity, paymentsForRepurchaseOfPreferredStock, dividendPayout, dividendPayoutCommonStock, dividendPayoutPreferredStock, proceedsFromIssuanceOfCommonStock, proceedsFromIssuanceOfLongTermDebtAndCapitalSecuritiesNet, proceedsFromIssuanceOfPreferredStock, proceedsFromRepurchaseOfEquity, proceedsFromSaleOfTreasuryStock, changeInCashAndCashEquivalents, changeInExchangeRate, netIncome) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
-        #                 (row.fiscalDateEnding, row.reportedCurrency, row.operatingCashflow, row.paymentsForOperatingActivities, row.proceedsFromOperatingActivities, row.changeInOperatingLiabilities, row.changeInOperatingAssets, row.depreciationDepletionAndAmortization, row.capitalExpenditures, row.changeInReceivables, row.changeInInventory, row.profitLoss, row.cashflowFromInvestment, row.cashflowFromFinancing, row.proceedsFromRepaymentsOfShortTermDebt, row.paymentsForRepurchaseOfCommonStock, row.paymentsForRepurchaseOfEquity, row.paymentsForRepurchaseOfPreferredStock, row.dividendPayout, row.dividendPayoutCommonStock, row.dividendPayoutPreferredStock, row.proceedsFromIssuanceOfCommonStock, row.proceedsFromIssuanceOfLongTermDebtAndCapitalSecuritiesNet, row.proceedsFromIssuanceOfPreferredStock, row.proceedsFromRepurchaseOfEquity, row.proceedsFromSaleOfTreasuryStock, row.changeInCashAndCashEquivalents, row.changeInExchangeRate, row.netIncome))
-
-
-        # Commit the changes to the database
-        conn.commit()
-
-        # Close the database connection
-        cur.close()
-        conn.close()
 
 
 if __name__ == '__main__':
     stock = StockData('MSFT')
-    # historical_data = stock.get_historical_data()
-
-    # print(historical_data)
-    # print(historical_data.info())
-
-    # overview, bs_df, is_df, cf_df = stock.get_fundamental_data()
-
-    # print(is_df)
-        
-    # for i in [is_df, cf_df]:
-    #     print(i)
-    
-    stock.save_to_database()
+    stock.save_to_database(conn_str=keys.connection_string)
