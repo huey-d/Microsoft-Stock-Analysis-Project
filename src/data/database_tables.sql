@@ -6,25 +6,25 @@ DROP TABLE if EXISTS cash_flow_data;
 
 CREATE TABLE historical_data (
     date DATE PRIMARY KEY,
-    "open" NUMERIC(12, 4) NOT NULL,
-    high NUMERIC(12, 4) NOT NULL,
-    low NUMERIC(12, 4) NOT NULL,
-    "close" NUMERIC(12, 4) NOT NULL,
-    adjusted_close NUMERIC(12, 4) NOT NULL,
+    "open" FLOAT NOT NULL,
+    high FLOAT NOT NULL,
+    low FLOAT NOT NULL,
+    "close" FLOAT NOT NULL,
+    adjusted_close FLOAT NOT NULL,
     volume BIGINT NOT NULL,
-    dividend_amount NUMERIC(12, 4) NOT NULL,
-    split_coefficient NUMERIC(12, 4) NOT NULL
+    dividend_amount FLOAT NOT NULL,
+    split_coefficient FLOAT NOT NULL
 );
 
 -- ALTER TABLE historical_data
 -- ALTER COLUMN "open" TYPE FLOAT USING "open"::float,
--- ALTER COLUMN high TYPE float USING high::float,
--- ALTER COLUMN "low" TYPE float USING low::float,
--- ALTER COLUMN "close" TYPE float USING "close"::float,
--- ALTER COLUMN adjusted_close TYPE float USING adjusted_close::float,
--- ALTER COLUMN volume TYPE float USING volume::float,
--- ALTER COLUMN dividend_amount TYPE float USING dividend_amount::float,
--- ALTER COLUMN split_coefficient TYPE float USING split_coefficient::float;
+-- ALTER COLUMN high TYPE FLOAT USING high::float,
+-- ALTER COLUMN "low" TYPE FLOAT USING low::float,
+-- ALTER COLUMN "close" TYPE FLOAT USING "close"::float,
+-- ALTER COLUMN adjusted_close TYPE FLOAT USING adjusted_close::float,
+-- ALTER COLUMN volume TYPE FLOAT USING volume::float,
+-- ALTER COLUMN dividend_amount TYPE FLOAT USING dividend_amount::float,
+-- ALTER COLUMN split_coefficient TYPE FLOAT USING split_coefficient::float;
 
 CREATE TABLE microsoft (
     Symbol VARCHAR(255),
@@ -39,16 +39,16 @@ CREATE TABLE microsoft (
     Address VARCHAR(255),
     FiscalYearEnd VARCHAR(255),
     LatestQuarter VARCHAR(255),
-    MarketCapitalization VARCHAR(255),
-    EPS VARCHAR(255),
-    ProfitMargin VARCHAR(255),
-    QuarterlyEarningsGrowthYOY VARCHAR(255),
-    QuarterlyRevenueGrowthYOY VARCHAR(255),
-    AnalystTargetPrice VARCHAR(255),
-    Beta VARCHAR(255),
-    SharesOutstanding VARCHAR(255),
-    DividendDate VARCHAR(255),
-    ExDividendDate VARCHAR(255)
+    MarketCapitalization NUMERIC(20,4),
+    EPS NUMERIC(20,4),
+    ProfitMargin NUMERIC(20,4),
+    QuarterlyEarningsGrowthYOY NUMERIC(20,4),
+    QuarterlyRevenueGrowthYOY NUMERIC(20,4),
+    AnalystTargetPrice NUMERIC(20,4),
+    Beta NUMERIC(20,4),
+    SharesOutstanding BIGINT,
+    DividendDate DATE,
+    ExDividendDate DATE
 );
 
 -- ALTER TABLE microsoft
@@ -64,7 +64,7 @@ CREATE TABLE microsoft (
 --     ALTER COLUMN ExDividendDate TYPE DATE USING to_date(ExDividendDate, 'YYYY-MM-DD');
 
 CREATE TABLE balance_sheet_data (
-    fiscalDateEnding TEXT,
+    fiscalDateEnding TEXT, 
     reportedCurrency TEXT,
     totalAssets TEXT,
     totalCurrentAssets TEXT,
@@ -104,6 +104,49 @@ CREATE TABLE balance_sheet_data (
     commonStockSharesOutstanding TEXT
 );
 
+-- Altered Table (maybe)
+
+CREATE TABLE balance_sheet_data (
+    fiscalDateEnding DATE, 
+    reportedCurrency VARCHAR(250),
+    totalAssets FLOAT,
+    totalCurrentAssets FLOAT,
+    cashAndCashEquivalentsAtCarryingValue FLOAT,
+    cashAndShortTermInvestments FLOAT,
+    inventory FLOAT,
+    currentNetReceivables FLOAT,
+    totalNonCurrentAssets FLOAT,
+    propertyPlantEquipment FLOAT,
+    accumulatedDepreciationAmortizationPPE FLOAT,
+    intangibleAssets FLOAT,
+    intangibleAssetsExcludingGoodwill FLOAT,
+    goodwill FLOAT,
+    investments FLOAT,
+    longTermInvestments FLOAT,
+    shortTermInvestments FLOAT,
+    otherCurrentAssets FLOAT,
+    otherNonCurrentAssets FLOAT,
+    totalLiabilities FLOAT,
+    totalCurrentLiabilities FLOAT,
+    currentAccountsPayable FLOAT,
+    deferredRevenue VARCHAR(255),
+    currentDebt FLOAT,
+    shortTermDebt FLOAT,
+    totalNonCurrentLiabilities FLOAT,
+    capitalLeaseObligations VARCHAR(255),
+    longTermDebt FLOAT,
+    currentLongTermDebt FLOAT,
+    longTermDebtNoncurrent FLOAT,
+    shortLongTermDebtTotal FLOAT,
+    otherCurrentLiabilities FLOAT,
+    otherNonCurrentLiabilities FLOAT,
+    totalShareholderEquity FLOAT,
+    treasuryStock VARCHAR(255),
+    retainedEarnings FLOAT,
+    commonStock FLOAT,
+    commonStockSharesOutstanding BIGINT
+);
+
 
 
 CREATE TABLE income_statement_data (
@@ -119,7 +162,7 @@ CREATE TABLE income_statement_data (
     operatingExpenses FLOAT,
     investmentIncomeNet FLOAT,
     netInterestIncome FLOAT,
-    interestIncome TEXT,
+    interestIncome VARCHAR(255),
     interestExpense FLOAT,
     nonInterestIncome FLOAT,
     otherNonOperatingIncome FLOAT,
