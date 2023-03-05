@@ -133,4 +133,4 @@ class StockData:
 
 if __name__ == '__main__':
     stock = StockData('MSFT')
-    # stock.save_to_database(conn_str=keys.connection_string)
+    # stock.save_to_database(conn_str=keys.cloud_connection_string)
