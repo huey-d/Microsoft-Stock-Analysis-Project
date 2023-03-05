@@ -9,30 +9,6 @@ from keys import api_key
 
 import pprint
 
-# overview_columns = [
-#     'Symbol',
-#     'AssetType',
-#     'Name',
-#     'Description',
-#     'Exchange',
-#     'Currency',
-#     'Country',
-#     'Sector',
-#     'Industry',
-#     'Address',
-#     'FiscalYearEnd',
-#     'LatestQuarter',
-#     'MarketCapitalization',
-#     'EPS',
-#     'ProfitMargin',
-#     'QuarterlyEarningsGrowthYOY',
-#     'QuarterlyRevenueGrowthYOY',
-#     'AnalystTargetPrice',
-#     'Beta',
-#     'SharesOutstanding',
-#     'DividendDate'
-# ]
-
 class StockData:
     """
     A class for fetching, storing and persisting stock data for a particular ticker. 
@@ -157,4 +133,4 @@ class StockData:
 
 if __name__ == '__main__':
     stock = StockData('MSFT')
-    stock.save_to_database(conn_str=keys.connection_string)
+    # stock.save_to_database(conn_str=keys.connection_string)

@@ -16,31 +16,6 @@ CREATE TABLE historical_data (
     split_coefficient FLOAT NOT NULL
 );
 
--- CREATE TABLE microsoft (
---     Symbol VARCHAR(255),
---     AssetType VARCHAR(255),
---     Name VARCHAR(255),
---     Description TEXT,
---     Exchange VARCHAR(255),
---     Currency VARCHAR(255),
---     Country VARCHAR(255),
---     Sector VARCHAR(255),
---     Industry VARCHAR(255),
---     Address VARCHAR(255),
---     FiscalYearEnd VARCHAR(255),
---     LatestQuarter VARCHAR(255),
---     MarketCapitalization NUMERIC(20,4),
---     EPS NUMERIC(20,4),
---     ProfitMargin NUMERIC(20,4),
---     QuarterlyEarningsGrowthYOY NUMERIC(20,4),
---     QuarterlyRevenueGrowthYOY NUMERIC(20,4),
---     AnalystTargetPrice NUMERIC(20,4),
---     Beta NUMERIC(20,4),
---     SharesOutstanding BIGINT,
---     DividendDate DATE,
---     ExDividendDate DATE
--- );
-
 CREATE TABLE microsoft (
     Symbol VARCHAR(255),
     AssetType VARCHAR(255),
