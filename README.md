@@ -1,7 +1,7 @@
 finance
 ==============================
 
-*work in progress*
+![](reports/figures/microsoft_dashboard.png)
 
 Project Organization
 ------------
