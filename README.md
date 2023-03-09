@@ -1,7 +1,12 @@
 finance
 ==============================
 
-![](reports/figures/microsoft_dashboard.png)
+# Overview of Microsoft
+![](reports/figures/overview.png)
+
+# Balance Sheet
+
+![](reports/figures/balance_sheet.png)
 
 Project Organization
 ------------
